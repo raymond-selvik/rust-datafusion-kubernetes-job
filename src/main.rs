@@ -4,7 +4,7 @@ use datafusion::prelude::*;
 async fn main() -> datafusion::error::Result<()> {
   // create the dataframe
   let ctx = SessionContext::new();
-  let df = ctx.read_csv("test.csv", CsvReadOptions::new()).await?;
+  let df = ctx.read_csv("data/test.csv", CsvReadOptions::new()).await?;
 
   let df = df.filter(col("a").lt_eq(col("b")))?
            .aggregate(vec![col("a")], vec![min(col("b"))])?;
