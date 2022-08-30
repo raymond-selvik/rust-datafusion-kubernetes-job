@@ -11,7 +11,7 @@ FROM debian:buster-slim
 
 # copy the build artifact from the build stage
 COPY --from=build /target/release/rust-datafusion-kubernetes-job .
-COPY /data .
+COPY data data
 
 # set the startup command to run your binary
 CMD ["./rust-datafusion-kubernetes-job"]
