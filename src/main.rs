@@ -3,6 +3,8 @@ use datafusion::prelude::*;
 #[tokio::main]
 async fn main() -> datafusion::error::Result<()> {
   // create the dataframe
+
+  println!("Hello World!");
   let ctx = SessionContext::new();
   let df = ctx.read_csv("data/test.csv", CsvReadOptions::new()).await?;
 

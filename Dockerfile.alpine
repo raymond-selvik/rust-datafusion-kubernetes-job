@@ -1,0 +1,30 @@
+FROM rust:latest as build
+
+RUN apt-get update
+RUN apt-get install musl-tools -y
+RUN rustup target add x86_64-unknown-linux-musl
+
+
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./src ./src
+
+
+RUN cargo build --release --target=x86_64-unknown-linux-musl
+
+
+# our final base
+FROM alpine:latest
+
+RUN addgroup -g 1000 job
+RUN adduser -D -s /bin/sh -u 1000 -G job job
+
+COPY --from=build /target/x86_64-unknown-linux-musl/release/rust-datafusion-kubernetes-job .
+COPY data data
+
+RUN chown job:job rust-datafusion-kubernetes-job
+
+USER job
+
+CMD ["./rust-datafusion-kubernetes-job"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]

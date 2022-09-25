@@ -7,11 +7,9 @@ COPY ./src ./src
 RUN cargo build --release
 
 # our final base
-FROM debian:buster-slim
+FROM debian:buster
 
-# copy the build artifact from the build stage
 COPY --from=build /target/release/rust-datafusion-kubernetes-job .
 COPY data data
 
-# set the startup command to run your binary
 CMD ["./rust-datafusion-kubernetes-job"]

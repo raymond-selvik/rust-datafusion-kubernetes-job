@@ -1,0 +1,43 @@
+FROM rust:latest as build
+
+RUN apt-get update
+RUN apt-get install musl-tools -y
+RUN rustup target add x86_64-unknown-linux-musl
+
+RUN update-ca-certificates
+
+
+ENV USER=job
+ENV UID=10001
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
+
+
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./src ./src
+
+
+RUN cargo build --release --target=x86_64-unknown-linux-musl
+
+
+# our final base
+FROM scratch
+
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+
+COPY --from=build /target/x86_64-unknown-linux-musl/release/rust-datafusion-kubernetes-job .
+COPY data data
+
+USER job:job
+
+CMD ["./rust-datafusion-kubernetes-job"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
